@@ -3913,7 +3913,15 @@ var egret;
             var xMin = 0, xMax = 0, yMin = 0, yMax = 0;
             var found = false;
             for (var i = -1; i < length; i++) {
-                var childBounds = i == -1 ? bounds : children[i].$getTransformedBounds(this, egret.$TempRectangle);
+                var childBounds = void 0;
+                if (i == -1) {
+                    childBounds = bounds;
+                }
+                else {
+                    children[i].getBounds(egret.$TempRectangle);
+                    children[i].$getMatrix().$transformBounds(egret.$TempRectangle);
+                    childBounds = egret.$TempRectangle;
+                }
                 if (childBounds.isEmpty()) {
                     continue;
                 }
@@ -11850,8 +11858,8 @@ var egret;
          */
         Matrix.prototype.$getScaleX = function () {
             var m = this;
-            if (m.a == 1 && m.b == 0) {
-                return 1;
+            if (m.b == 0) {
+                return m.a;
             }
             var result = Math.sqrt(m.a * m.a + m.b * m.b);
             return this.getDeterminant() < 0 ? -result : result;
@@ -11861,8 +11869,8 @@ var egret;
          */
         Matrix.prototype.$getScaleY = function () {
             var m = this;
-            if (m.c == 0 && m.d == 1) {
-                return 1;
+            if (m.c == 0) {
+                return m.d;
             }
             var result = Math.sqrt(m.c * m.c + m.d * m.d);
             return this.getDeterminant() < 0 ? -result : result;
@@ -11871,13 +11879,23 @@ var egret;
          * @private
          */
         Matrix.prototype.$getSkewX = function () {
-            return Math.atan2(this.d, this.c) - (PI / 2);
+            if (this.d < 0) {
+                return Math.atan2(this.d, this.c) + (PI / 2);
+            }
+            else {
+                return Math.atan2(this.d, this.c) - (PI / 2);
+            }
         };
         /**
          * @private
          */
         Matrix.prototype.$getSkewY = function () {
-            return Math.atan2(this.b, this.a);
+            if (this.a < 0) {
+                return Math.atan2(this.b, this.a) - PI;
+            }
+            else {
+                return Math.atan2(this.b, this.a);
+            }
         };
         /**
          * @private
